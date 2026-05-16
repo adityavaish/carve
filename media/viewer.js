@@ -37,6 +37,7 @@ try {
   const wasmBinary = await fetch(wasmUrl).then((r) => r.arrayBuffer());
   Module = await OpenSCAD({
     noInitialRun: true,
+    noExitRuntime: true,
     wasmBinary,
     locateFile: () => wasmUrl.toString()
   });
@@ -88,11 +89,19 @@ loop();
 let pending = 0;
 async function runOpenscad(code, format) {
   capture.reset();
+  // Reset emscripten exit flags so callMain can be invoked again.
+  try { Module.setValue?.(0, 0, 'i32'); } catch {}
+  if ('EXITSTATUS' in Module) try { Module.EXITSTATUS = 0; } catch {}
   try { Module.FS.unlink('/in.scad'); } catch {}
   try { Module.FS.unlink('/out'); } catch {}
   Module.FS.writeFile('/in.scad', code);
-  const rc = Module.callMain(['/in.scad', '-o', '/out', '--export-format=' + format]);
-  if (rc !== 0) {
+  let rc;
+  try {
+    rc = Module.callMain(['/in.scad', '-o', '/out', '--export-format=' + format]);
+  } catch (e) {
+    return { success: false, stderr: capture.stderr() || String(e) };
+  }
+  if (rc !== 0 && rc !== undefined) {
     return { success: false, stderr: capture.stderr() || `OpenSCAD exited ${rc}` };
   }
   let data;
@@ -162,3 +171,6 @@ window.addEventListener('message', (ev) => {
   if (msg?.type === 'render') renderToScene(msg.code);
   else if (msg?.type === 'export') doExport(msg.code, msg.format || 'binstl');
 });
+
+// Tell host we're ready (in case the initial 'ready' was sent before this listener registered).
+vscode.postMessage({ type: 'ready' });

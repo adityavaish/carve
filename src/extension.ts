@@ -88,13 +88,13 @@ function onDocChange(e: vscode.TextDocumentChangeEvent) {
   if (!cfg.get<boolean>('autoRender', true)) return;
   const debounce = cfg.get<number>('debounceMs', 500);
   if (renderTimer) clearTimeout(renderTimer);
-  renderTimer = setTimeout(() => triggerRender(false), debounce);
+  renderTimer = setTimeout(() => renderDocument(e.document, false), debounce);
 }
 
 function onActiveEditorChange(editor: vscode.TextEditor | undefined) {
   if (!currentPanel || !editor || editor.document.languageId !== 'scad') return;
   currentPanel.title = `Carve: ${path.basename(editor.document.fileName)}`;
-  triggerRender(true);
+  renderDocument(editor.document, true);
 }
 
 function triggerRender(force: boolean) {
@@ -104,6 +104,11 @@ function triggerRender(force: boolean) {
     ? editor.document
     : vscode.workspace.textDocuments.find((d) => d.languageId === 'scad');
   if (!doc) return;
+  renderDocument(doc, force);
+}
+
+function renderDocument(doc: vscode.TextDocument, force: boolean) {
+  if (!currentPanel) return;
   currentPanel.webview.postMessage({
     type: 'render',
     code: doc.getText(),
