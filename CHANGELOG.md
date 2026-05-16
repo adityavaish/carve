@@ -1,5 +1,8 @@
 # Change Log
 
+## 0.1.4 — 2026-05-16
+- Marketplace-ready: hero screenshot in README, credits, build-from-source instructions
+
 ## 0.1.3 — 2026-05-16
 - Add marketplace icon and gallery banner color
 - Add `bugs` and `homepage` metadata for the marketplace listing

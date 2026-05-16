@@ -1,16 +1,30 @@
 # Carve
 
+<p align="center">
+  <img src="images/icon.png" width="120" alt="Carve icon" />
+</p>
+
 **Carve** is a VS Code extension that gives you a live, no-install 3D preview of [OpenSCAD](https://openscad.org/) `.scad` files — entirely in-browser via WebAssembly. No native OpenSCAD binary required.
+
+![Carve hero](images/hero.png)
 
 ## Features
 
-- 🔄 **Live preview** — open any `.scad` file, hit `Ctrl+K V`, and see your model update as you type
+- 🔄 **Live preview** — open any `.scad` file, hit `Ctrl+K V`, and watch your model update as you type
 - 🧱 **Self-contained** — ships the full OpenSCAD engine as ~10 MB of WebAssembly, plus a Three.js mesh viewer
 - 🧭 **OrbitControls** — drag to orbit, scroll to zoom, right-click to pan
 - 📤 **Export** — STL / 3MF / OFF / AMF / OBJ via `Carve: Export STL`
 - 🪲 **Inline diagnostics** — OpenSCAD parser/render errors surface in VS Code's Problems pane
 - 🌐 **Works in vscode.dev / Codespaces / Remote SSH** — pure WASM, no native deps
 - 🎨 **Syntax highlighting** for the SCAD language
+
+## Usage
+
+1. Open any `.scad` file
+2. Press **`Ctrl+K V`** (`Cmd+K V` on macOS) to open the preview beside the editor
+3. Edit your code — the model re-renders ~500 ms after you stop typing
+4. Drag the viewer to orbit, scroll to zoom
+5. Run **`Carve: Export STL`** from the command palette to save geometry to disk
 
 ## Commands
 
@@ -49,6 +63,8 @@ The OpenSCAD WASM build comes from the upstream [openscad/openscad-wasm](https:/
 ## Build from source
 
 ```pwsh
+git clone https://github.com/adityavaish/carve.git
+cd carve
 npm install
 npm run package      # builds dist/extension.js with esbuild
 npx vsce package --no-dependencies   # produces carve-X.Y.Z.vsix
@@ -57,4 +73,11 @@ code --install-extension carve-*.vsix
 
 ## License
 
-MIT — except for the bundled `media/openscad.{js,wasm}` (GPL-2.0-or-later with CGAL exception) and Three.js (MIT). See `LICENSE`.
+MIT — except for the bundled `media/openscad.{js,wasm}` (GPL-2.0-or-later with CGAL exception) and Three.js (MIT). See [`LICENSE`](LICENSE).
+
+## Credits
+
+- [OpenSCAD](https://openscad.org/) — the engine doing the actual work
+- [openscad-wasm](https://github.com/openscad/openscad-wasm) — Emscripten toolchain & Docker base image
+- [openscad-playground](https://github.com/openscad/openscad-playground) — inspiration & prior art
+- [Three.js](https://threejs.org/) — the mesh viewer
