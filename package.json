@@ -1,0 +1,81 @@
+{
+  "name": "carve",
+  "displayName": "Carve — OpenSCAD Live Preview",
+  "description": "Live 3D preview for OpenSCAD (.scad) files using a bundled WebAssembly build — no native OpenSCAD install required.",
+  "version": "0.1.0",
+  "publisher": "adityavaish",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adityavaish/carve.git"
+  },
+  "engines": { "vscode": "^1.85.0" },
+  "categories": ["Visualization", "Programming Languages"],
+  "keywords": ["openscad", "scad", "cad", "3d", "wasm"],
+  "main": "./dist/extension.js",
+  "activationEvents": ["onLanguage:scad"],
+  "contributes": {
+    "languages": [{
+      "id": "scad",
+      "aliases": ["OpenSCAD", "scad"],
+      "extensions": [".scad"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "scad",
+      "scopeName": "source.scad",
+      "path": "./syntaxes/scad.tmLanguage.json"
+    }],
+    "commands": [
+      { "command": "carve.openPreview", "title": "Carve: Open Live Preview", "icon": "$(open-preview)" },
+      { "command": "carve.exportStl",   "title": "Carve: Export STL" },
+      { "command": "carve.refresh",     "title": "Carve: Re-render", "icon": "$(refresh)" }
+    ],
+    "menus": {
+      "editor/title": [
+        { "when": "resourceLangId == scad", "command": "carve.openPreview", "group": "navigation" }
+      ]
+    },
+    "keybindings": [
+      { "command": "carve.openPreview", "key": "ctrl+k v", "mac": "cmd+k v", "when": "resourceLangId == scad" },
+      { "command": "carve.refresh",     "key": "ctrl+shift+r", "when": "carve.previewActive" }
+    ],
+    "configuration": {
+      "title": "Carve",
+      "properties": {
+        "carve.autoRender": {
+          "type": "boolean",
+          "default": true,
+          "description": "Re-render preview as you type."
+        },
+        "carve.debounceMs": {
+          "type": "number",
+          "default": 500,
+          "minimum": 100,
+          "maximum": 5000,
+          "description": "Debounce delay (ms) before re-rendering after a change."
+        },
+        "carve.exportFormat": {
+          "type": "string",
+          "default": "binstl",
+          "enum": ["binstl", "asciistl", "off", "amf", "3mf", "obj"],
+          "description": "Format used by Carve: Export STL command."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "compile": "node esbuild.config.mjs",
+    "package": "node esbuild.config.mjs --production",
+    "watch":   "node esbuild.config.mjs --watch",
+    "vsix":    "vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^2.24.0",
+    "esbuild": "^0.20.0",
+    "typescript": "^5.3.3"
+  }
+}

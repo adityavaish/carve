@@ -1,0 +1,47 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "OpenSCAD",
+  "scopeName": "source.scad",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#strings" },
+    { "include": "#numbers" },
+    { "include": "#keywords" },
+    { "include": "#builtins" },
+    { "include": "#specials" },
+    { "include": "#operators" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        { "name": "comment.line.double-slash.scad", "match": "//.*$" },
+        { "name": "comment.block.scad", "begin": "/\\*", "end": "\\*/" }
+      ]
+    },
+    "strings": {
+      "name": "string.quoted.double.scad",
+      "begin": "\"", "end": "\"",
+      "patterns": [{ "name": "constant.character.escape.scad", "match": "\\\\." }]
+    },
+    "numbers": {
+      "name": "constant.numeric.scad",
+      "match": "\\b\\d+(\\.\\d+)?([eE][+-]?\\d+)?\\b"
+    },
+    "keywords": {
+      "name": "keyword.control.scad",
+      "match": "\\b(module|function|if|else|for|let|each|true|false|undef|include|use)\\b"
+    },
+    "builtins": {
+      "name": "support.function.scad",
+      "match": "\\b(cube|sphere|cylinder|polyhedron|square|circle|polygon|text|linear_extrude|rotate_extrude|translate|rotate|scale|mirror|resize|color|offset|hull|minkowski|union|difference|intersection|render|projection|surface|import|children|echo|assert|len|str|chr|ord|abs|sin|cos|tan|asin|acos|atan|atan2|sqrt|pow|exp|log|ln|min|max|ceil|floor|round|norm|cross|concat|search|version)\\b"
+    },
+    "specials": {
+      "name": "variable.language.scad",
+      "match": "\\$(fa|fs|fn|t|vpr|vpt|vpd|vpf|children|preview)\\b"
+    },
+    "operators": {
+      "name": "keyword.operator.scad",
+      "match": "==|!=|<=|>=|&&|\\|\\||[+\\-*/%<>=!?:]"
+    }
+  }
+}
