@@ -2,13 +2,22 @@
   "name": "carve",
   "displayName": "Carve — OpenSCAD Live Preview",
   "description": "Live 3D preview for OpenSCAD (.scad) files using a bundled WebAssembly build — no native OpenSCAD install required.",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "publisher": "adityavaish",
   "license": "MIT",
+  "icon": "images/icon.png",
+  "galleryBanner": {
+    "color": "#1E1E2F",
+    "theme": "dark"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/adityavaish/carve.git"
   },
+  "bugs": {
+    "url": "https://github.com/adityavaish/carve/issues"
+  },
+  "homepage": "https://github.com/adityavaish/carve#readme",
   "engines": { "vscode": "^1.85.0" },
   "categories": ["Visualization", "Programming Languages"],
   "keywords": ["openscad", "scad", "cad", "3d", "wasm"],

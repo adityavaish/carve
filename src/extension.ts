@@ -210,7 +210,9 @@ function renderWebviewHtml(webview: vscode.Webview, extUri: vscode.Uri): string 
   html, body { margin: 0; height: 100%; background: #2a2a3a; color: #ddd; font-family: var(--vscode-font-family); }
   #status { position: absolute; top: 8px; left: 8px; right: 8px; padding: 4px 10px;
             font: 12px var(--vscode-editor-font-family); background: rgba(0,0,0,0.45);
-            border-radius: 4px; pointer-events: none; }
+            border-radius: 4px; pointer-events: none;
+            max-height: 50vh; overflow-y: auto; white-space: pre-wrap;
+            word-break: break-word; }
   #viewer { width: 100vw; height: 100vh; display: block; }
   #status.error { background: rgba(150,30,30,0.75); }
 </style>

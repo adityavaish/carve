@@ -29,12 +29,13 @@ function captureOutput(Module) {
 }
 
 setStatus('Loading openscad.wasm\u2026');
-let Module, capture;
+let wasmBinary;
+let capture;
+let Module; // current instance, replaced per render
 try {
-  // Fetch the .wasm bytes ourselves so Emscripten doesn't try a streaming compile
-  // against a vscode-resource:// URL (which it can't match against the script URL).
   const wasmUrl = new URL(import.meta.resolve('openscad-wasm'));
-  const wasmBinary = await fetch(wasmUrl).then((r) => r.arrayBuffer());
+  wasmBinary = await fetch(wasmUrl).then((r) => r.arrayBuffer());
+  // Eager-instantiate once so the first render is fast.
   Module = await OpenSCAD({
     noInitialRun: true,
     noExitRuntime: true,
@@ -48,6 +49,18 @@ try {
   setStatus('Failed to load OpenSCAD WASM: ' + e.message, true);
   vscode.postMessage({ type: 'rendered', success: false, stderr: String(e) });
   throw e;
+}
+
+async function freshModule() {
+  const wasmUrl = new URL(import.meta.resolve('openscad-wasm'));
+  const M = await OpenSCAD({
+    noInitialRun: true,
+    noExitRuntime: true,
+    wasmBinary,
+    locateFile: () => wasmUrl.toString()
+  });
+  capture = captureOutput(M);
+  return M;
 }
 
 // --- Three.js scene -------------------------------------------------------
@@ -87,14 +100,18 @@ loop();
 
 // --- Render pipeline ------------------------------------------------------
 let pending = 0;
+let moduleUsed = false; // true once we've called callMain on `Module`
 async function runOpenscad(code, format) {
+  // OpenSCAD's main() leaves C++ static state behind that prevents a clean
+  // second call. Re-instantiate the module between renders.
+  if (moduleUsed) {
+    Module = await freshModule();
+  }
+  moduleUsed = true;
   capture.reset();
-  // Reset emscripten exit flags so callMain can be invoked again.
-  try { Module.setValue?.(0, 0, 'i32'); } catch {}
-  if ('EXITSTATUS' in Module) try { Module.EXITSTATUS = 0; } catch {}
-  try { Module.FS.unlink('/in.scad'); } catch {}
-  try { Module.FS.unlink('/out'); } catch {}
-  Module.FS.writeFile('/in.scad', code);
+  try { Module.FS.writeFile('/in.scad', code); } catch (e) {
+    return { success: false, stderr: 'FS.writeFile failed: ' + e.message };
+  }
   let rc;
   try {
     rc = Module.callMain(['/in.scad', '-o', '/out', '--export-format=' + format]);

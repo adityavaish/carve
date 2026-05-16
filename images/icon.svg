@@ -1,0 +1,86 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2A2A3A"/>
+      <stop offset="1" stop-color="#15151F"/>
+    </linearGradient>
+    <linearGradient id="topFace" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFD479"/>
+      <stop offset="1" stop-color="#F0A41E"/>
+    </linearGradient>
+    <linearGradient id="leftFace" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#C8881A"/>
+      <stop offset="1" stop-color="#8B5D0E"/>
+    </linearGradient>
+    <linearGradient id="rightFace" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#E0941E"/>
+      <stop offset="1" stop-color="#A06A10"/>
+    </linearGradient>
+    <!-- Interior (revealed by the carve) is darker -->
+    <linearGradient id="cutTop" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a2a08"/>
+      <stop offset="1" stop-color="#1c1404"/>
+    </linearGradient>
+    <linearGradient id="cutRight" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2a1d05"/>
+      <stop offset="1" stop-color="#120c02"/>
+    </linearGradient>
+    <linearGradient id="cutLeft" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#241902"/>
+      <stop offset="1" stop-color="#0e0a01"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="7" flood-color="#000" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <rect width="256" height="256" rx="44" ry="44" fill="url(#bg)"/>
+
+  <!--
+    Isometric cube with the top-front-right corner cube subtracted (CSG difference).
+    Coordinate system: origin at cube center (translate). dx=72, dy=42 per edge.
+    Eight cube corners (around the centre):
+      Top:    A=(0,-(2*dy)) [back-top], B=(2*dx,-dy) [right-top], C=(0,0) [front-top center], D=(-2*dx,-dy) [left-top]
+      Bottom: A'=A+(0,2*dy*2), ...  using full edge length 2*dy vertical.
+    For clarity we hand-build face polygons.
+  -->
+  <g transform="translate(128 142)" filter="url(#shadow)">
+    <!-- Full cube faces first (with the carved area shown via overlays after) -->
+
+    <!-- LEFT face (full) -->
+    <path d="M -72,-42  L 0,-84  L 0,80  L -72,38 Z"
+          fill="url(#leftFace)" stroke="#3a2807" stroke-width="2" stroke-linejoin="round"/>
+
+    <!-- RIGHT face: top half carved away (replace top-right quarter with the cut interior).
+         Outer right face full would be: M 72,-42  L 0,-84  L 0,80  L 72,38 Z.
+         We draw it WITHOUT the top half — bottom half remains. -->
+    <path d="M 72,-2  L 0,-42  L 0,80  L 72,38 Z"
+          fill="url(#rightFace)" stroke="#3a2807" stroke-width="2" stroke-linejoin="round"/>
+
+    <!-- TOP face: front-right quadrant carved away.
+         Full top would be: M 0,-84 L 72,-42 L 0,0 L -72,-42 Z.
+         Replace it with a notched polygon (missing the front-right quarter). -->
+    <path d="M 0,-84  L 72,-42  L 36,-21  L 0,-42  L -36,-21  L -72,-42 Z"
+          fill="url(#topFace)" stroke="#3a2807" stroke-width="2" stroke-linejoin="round"/>
+
+    <!-- Carved-out interior faces (the inside of the cube revealed by the removed corner cube) -->
+    <!-- Interior TOP (a small square at half-height where the corner cube sat) -->
+    <path d="M 0,-42  L 36,-21  L 0,0  L -36,-21 Z"
+          fill="url(#cutTop)" stroke="#1a1100" stroke-width="1.5" stroke-linejoin="round"/>
+    <!-- Interior RIGHT wall (the back wall of the cut, facing left-front) -->
+    <path d="M 0,-42  L 36,-21  L 36,21  L 0,0 Z"
+          fill="url(#cutRight)" stroke="#1a1100" stroke-width="1.5" stroke-linejoin="round"/>
+    <!-- Interior LEFT wall of the cut (facing right-front) -->
+    <path d="M 0,0  L 36,21  L 36,-21  L 0,-42 Z" fill="none"/>
+    <!-- Interior FRONT wall facing the viewer -->
+    <path d="M -36,-21  L 0,-42  L 0,0  L -36,21 Z"
+          fill="url(#cutLeft)" stroke="#1a1100" stroke-width="1.5" stroke-linejoin="round"/>
+
+    <!-- Crisp highlight edges -->
+    <g stroke="#FFE9B0" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.7">
+      <path d="M -72,-42 L 0,-84 L 72,-42"/>
+      <path d="M 0,-84 L 0,-42"/>
+    </g>
+  </g>
+</svg>
+
