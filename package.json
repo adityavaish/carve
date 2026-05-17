@@ -2,8 +2,8 @@
   "name": "carve",
   "displayName": "Carve — OpenSCAD Live Preview",
   "description": "Live 3D preview for OpenSCAD (.scad) files using a bundled WebAssembly build — no native OpenSCAD install required.",
-  "version": "0.1.4",
-  "publisher": "adityavaish",
+  "version": "0.1.5",
+  "publisher": "carve3d",
   "license": "MIT",
   "icon": "images/icon.png",
   "galleryBanner": {

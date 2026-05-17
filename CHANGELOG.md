@@ -1,5 +1,8 @@
 # Change Log
 
+## 0.1.5 — 2026-05-16
+- Corrected publisher ID to `carve3d` (first marketplace release)
+
 ## 0.1.4 — 2026-05-16
 - Marketplace-ready: hero screenshot in README, credits, build-from-source instructions
 
