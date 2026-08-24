@@ -1,5 +1,19 @@
 # Change Log
 
+## Unreleased
+
+- Preserve evaluated colors when colored parts are nested inside OpenSCAD union containers
+- Improve gray-part visibility with a light 3D background, color management, and balanced studio lighting
+- Add a user-controlled compilation log for OpenSCAD assertions, errors, warnings, echoes, and render statistics
+- Publish warnings from successful renders to VS Code's Problems pane
+- Add SVG previews for top-level 2D geometry
+- Automatically switch between SVG and STL when a model changes dimensionality
+- Add zoom-to-fit, wheel/pinch zoom, drag-to-pan, grid, and X/Y axes for 2D previews
+- Add adaptive numeric tick measurements along the 2D axes
+- Treat empty top-level geometry as a normal empty preview and suppress benign localization startup noise
+- Preview independent top-level 2D and 3D branches together while rejecting incompatible mixed operations within one branch
+- Preserve out-of-plane rotations and Z translations on hybrid 2D profiles
+
 ## 0.1.5 — 2026-05-16
 - Corrected publisher ID to `carve3d` (first marketplace release)
 

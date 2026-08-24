@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Carve manual preview fixture</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #2a2a3a; color: #ddd; font-family: sans-serif; }
+    #status { position: absolute; z-index: 4; top: 8px; left: 8px; right: 8px; padding: 4px 10px;
+              background: rgba(0,0,0,0.65); border-radius: 4px; pointer-events: none; }
+    #viewer { width: 100vw; height: 100vh; display: block; }
+    #emptyPreview { width: 100vw; height: 100vh; display: grid; place-items: center; color: #aaa; }
+    .viewer-button { position: absolute; z-index: 3; bottom: 10px; }
+    .fit-button { right: 10px; }
+    #axes3d { right: 58px; }
+    #viewPresets3d { position: absolute; z-index: 3; right: 143px; bottom: 10px; display: grid; grid-template-columns: repeat(3, auto); gap: 3px; }
+    #viewPresets3d .viewer-button { position: static; }
+    #projection3d { right: 247px; }
+    [hidden] { display: none !important; }
+    #status.error { background: rgba(150,30,30,0.75); }
+    #consoleToggle { left: 10px; }
+    #compileConsole { position: absolute; z-index: 6; left: 8px; right: 8px; bottom: 44px;
+                      max-height: 42vh; overflow: auto; background: #1e1e1e; border: 1px solid #666; }
+    #compileLog { margin: 0; padding: 10px 12px; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <canvas id="viewer"></canvas>
+  <button id="consoleToggle" class="viewer-button" type="button" aria-expanded="false">Compilation log</button>
+  <button id="axes3d" class="viewer-button" type="button" aria-pressed="true" hidden>Hide axes</button>
+  <div id="viewPresets3d" role="group" aria-label="3D plane views" hidden>
+    <button class="viewer-button" type="button" data-plane-view="+X">+X</button>
+    <button class="viewer-button" type="button" data-plane-view="+Y">+Y</button>
+    <button class="viewer-button" type="button" data-plane-view="+Z">+Z</button>
+    <button class="viewer-button" type="button" data-plane-view="-X">-X</button>
+    <button class="viewer-button" type="button" data-plane-view="-Y">-Y</button>
+    <button class="viewer-button" type="button" data-plane-view="-Z">-Z</button>
+  </div>
+  <button id="projection3d" class="viewer-button" type="button" aria-pressed="false" hidden>Isometric</button>
+  <button id="fit3d" class="viewer-button fit-button" type="button" hidden>Fit</button>
+  <div id="emptyPreview" hidden>No top-level geometry to preview</div>
+  <div id="status">Loading OpenSCAD WebAssembly…</div>
+  <section id="compileConsole" aria-label="OpenSCAD compilation log" hidden>
+    <pre id="compileLog">No compiler output yet.</pre>
+  </section>
+  <script>
+    const hybridFixture = `
+      $fn = 32;
+      module profile() {
+        difference() {
+          circle(25);
+          circle(12.5);
+          translate([0, 15.375]) square([1.5, 7.06], center = true);
+        }
+      }
+      translate([-40, 0]) profile();
+      translate([40, 0, 0]) linear_extrude(12) profile();
+    `;
+    let renderRequested = false;
+    window.renderScad = (code) => window.postMessage({ type: 'render', code });
+    window.acquireVsCodeApi = () => ({
+      postMessage(message) {
+        window.lastCarveMessage = message;
+        if (message.type === 'ready' && !renderRequested) {
+          renderRequested = true;
+          queueMicrotask(() => window.renderScad(hybridFixture));
+        }
+      }
+    });
+  </script>
+  <script type="importmap">
+  {
+    "imports": {
+      "openscad": "../media/openscad.js",
+      "openscad-wasm": "../media/openscad.wasm",
+      "three": "../media/three.module.js",
+      "three/addons/controls/OrbitControls.js": "../media/OrbitControls.js",
+      "three/addons/loaders/STLLoader.js": "../media/STLLoader.js"
+    }
+  }
+  </script>
+  <script type="module" src="../media/viewer.js"></script>
+</body>
+</html>

@@ -1,8 +1,8 @@
 {
   "name": "carve",
   "displayName": "Carve — OpenSCAD Live Preview",
-  "description": "Live 3D preview for OpenSCAD (.scad) files using a bundled WebAssembly build — no native OpenSCAD install required.",
-  "version": "0.1.5",
+  "description": "Live 2D and 3D preview for OpenSCAD (.scad) files using a bundled WebAssembly build — no native OpenSCAD install required.",
+  "version": "0.1.6",
   "publisher": "carve3d",
   "license": "MIT",
   "icon": "images/icon.png",
@@ -64,11 +64,33 @@
           "maximum": 5000,
           "description": "Debounce delay (ms) before re-rendering after a change."
         },
+        "carve.renderBackend": {
+          "type": "string",
+          "default": "auto",
+          "enum": ["auto", "native", "wasm"],
+          "enumDescriptions": [
+            "Use native OpenSCAD when available, otherwise use bundled WebAssembly.",
+            "Prefer native OpenSCAD, falling back to WebAssembly for unsupported scenes.",
+            "Always use bundled WebAssembly."
+          ],
+          "description": "Renderer used for live previews. Native OpenSCAD is substantially faster for complex models."
+        },
+        "carve.nativeOpenSCADPath": {
+          "type": "string",
+          "default": "",
+          "description": "Optional path to the native OpenSCAD executable. Leave empty to detect it automatically."
+        },
         "carve.exportFormat": {
           "type": "string",
           "default": "binstl",
           "enum": ["binstl", "asciistl", "off", "amf", "3mf", "obj"],
           "description": "Format used by Carve: Export STL command."
+        },
+        "carve.fontFiles": {
+          "type": "array",
+          "default": [],
+          "items": { "type": "string" },
+          "description": "Additional .ttf, .otf, .ttc, or .otc font files to make available to OpenSCAD text(). Use this when a font's family name does not match its filename. Paths beginning with ~ are supported."
         }
       }
     }
@@ -76,6 +98,7 @@
   "scripts": {
     "vscode:prepublish": "npm run package",
     "compile": "node esbuild.config.mjs",
+    "test": "node --test",
     "package": "node esbuild.config.mjs --production",
     "watch":   "node esbuild.config.mjs --watch",
     "vsix":    "vsce package --no-dependencies"
