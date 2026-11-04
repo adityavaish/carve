@@ -20,7 +20,7 @@ The bundled Liberation fonts come from the revision pinned by the matching
 
 - Source: <https://github.com/shantigilbert/liberation-fonts-ttf>
 - Commit: `ef7161f03e305982b0b247e9a0b7cc472376dd83`
-- License: GNU General Public License v2 with font embedding exception; see
+- License: SIL Open Font License 1.1; see
   [`fonts/LICENSE`](fonts/LICENSE).
 
 At runtime, `fonts.js` mounts these files and `fonts.conf` at `/fonts` in every

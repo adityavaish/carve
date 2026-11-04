@@ -75,7 +75,7 @@ code --install-extension carve-*.vsix
 
 ## License
 
-MIT — except for the bundled `media/openscad.{js,wasm}` (GPL-2.0-or-later with CGAL exception) and Three.js (MIT). See [`LICENSE`](LICENSE).
+MIT — except for the bundled `media/openscad.{js,wasm}` (GPL-2.0-or-later with CGAL exception), Three.js (MIT), and Liberation fonts (SIL Open Font License 1.1). See [`LICENSE`](LICENSE).
 
 ## Credits
 
