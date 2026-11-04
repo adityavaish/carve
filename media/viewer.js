@@ -89,6 +89,12 @@ let hasFramedModel = false;
 const material = new THREE.MeshStandardMaterial({
   color: 0xf9b233, metalness: 0.1, roughness: 0.6, flatShading: true
 });
+const edgeMaterial = new THREE.LineBasicMaterial({
+  color: 0x5c3a08,
+  transparent: true,
+  opacity: 0.55,
+  depthWrite: false
+});
 
 function resize() {
   const w = canvas.clientWidth, h = canvas.clientHeight;
@@ -152,8 +158,15 @@ async function renderToScene(code) {
   try {
     const geom = new STLLoader().parse(stl.buffer.slice(stl.byteOffset, stl.byteOffset + stl.byteLength));
     geom.computeVertexNormals();
-    if (mesh) { scene.remove(mesh); mesh.geometry.dispose(); }
+    if (mesh) {
+      scene.remove(mesh);
+      mesh.children.forEach((child) => child.geometry?.dispose());
+      mesh.geometry.dispose();
+    }
     mesh = new THREE.Mesh(geom, material);
+    const edges = new THREE.LineSegments(new THREE.EdgesGeometry(geom, 30), edgeMaterial);
+    edges.renderOrder = 1;
+    mesh.add(edges);
     mesh.rotation.x = -Math.PI / 2; // OpenSCAD Z-up -> Three.js Y-up
     scene.add(mesh);
     geom.computeBoundingSphere();

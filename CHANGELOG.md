@@ -5,6 +5,7 @@
 - Add export smoke tests for binary STL and 3MF.
 - Bundle and mount the Liberation font families so OpenSCAD `text()` geometry renders in previews and exports.
 - Frame the camera around the model's actual center and preserve the user's view across live re-renders.
+- Add a subtle sharp-edge overlay so recessed details and engraved text remain legible under flat CAD shading.
 
 ## 0.1.5 — 2026-05-16
 - Corrected publisher ID to `carve3d` (first marketplace release)
