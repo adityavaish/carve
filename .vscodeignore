@@ -1,4 +1,5 @@
 .vscode/**
+tests/**
 src/**
 .gitignore
 esbuild.config.mjs

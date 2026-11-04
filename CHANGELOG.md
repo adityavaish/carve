@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+- Update the bundled OpenSCAD WebAssembly build to 2026.11.01, fixing a runtime function-signature mismatch when exporting 3MF files.
+- Add export smoke tests for binary STL and 3MF.
+
 ## 0.1.5 — 2026-05-16
 - Corrected publisher ID to `carve3d` (first marketplace release)
 
