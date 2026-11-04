@@ -60,6 +60,8 @@
 
 The OpenSCAD WASM build comes from the upstream [openscad/openscad-wasm](https://github.com/openscad/openscad-wasm) toolchain. The exact bundled snapshot and its checksums are recorded in [`media/OPENSCAD_WASM.md`](media/OPENSCAD_WASM.md).
 
+Carve also mounts the Liberation Mono, Sans, and Serif font families into the OpenSCAD virtual filesystem so `text()` produces the same geometry in the WASM preview and export paths.
+
 ## Build from source
 
 ```pwsh

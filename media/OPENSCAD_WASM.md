@@ -12,3 +12,16 @@ official OpenSCAD development snapshot:
 
 The artifact checksum was verified against the adjacent `.sha256` file served
 by `files.openscad.org` before the files were copied into this repository.
+
+## Fonts
+
+The bundled Liberation fonts come from the revision pinned by the matching
+`openscad/openscad-wasm` build:
+
+- Source: <https://github.com/shantigilbert/liberation-fonts-ttf>
+- Commit: `ef7161f03e305982b0b247e9a0b7cc472376dd83`
+- License: GNU General Public License v2 with font embedding exception; see
+  [`fonts/LICENSE`](fonts/LICENSE).
+
+At runtime, `fonts.js` mounts these files and `fonts.conf` at `/fonts` in every
+fresh Emscripten filesystem before OpenSCAD evaluates the model.
