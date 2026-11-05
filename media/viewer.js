@@ -6,6 +6,7 @@ import OpenSCAD from 'openscad';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { STLLoader } from 'three/addons/loaders/STLLoader.js';
+import { installFonts, loadFontAssets } from './fonts.js';
 
 const vscode = acquireVsCodeApi();
 const $status = document.getElementById('status');
@@ -32,9 +33,13 @@ setStatus('Loading openscad.wasm\u2026');
 let wasmBinary;
 let capture;
 let Module; // current instance, replaced per render
+const fontAssetsPromise = loadFontAssets();
 try {
   const wasmUrl = new URL(import.meta.resolve('openscad-wasm'));
-  wasmBinary = await fetch(wasmUrl).then((r) => r.arrayBuffer());
+  [wasmBinary] = await Promise.all([
+    fetch(wasmUrl).then((r) => r.arrayBuffer()),
+    fontAssetsPromise,
+  ]);
   // Eager-instantiate once so the first render is fast.
   Module = await OpenSCAD({
     noInitialRun: true,
@@ -42,6 +47,7 @@ try {
     wasmBinary,
     locateFile: () => wasmUrl.toString()
   });
+  installFonts(Module, await fontAssetsPromise);
   capture = captureOutput(Module);
   setStatus('Ready.');
   vscode.postMessage({ type: 'ready' });
@@ -59,6 +65,7 @@ async function freshModule() {
     wasmBinary,
     locateFile: () => wasmUrl.toString()
   });
+  installFonts(M, await fontAssetsPromise);
   capture = captureOutput(M);
   return M;
 }
@@ -78,8 +85,15 @@ scene.add(dir);
 scene.add(new THREE.GridHelper(100, 10, 0x444466, 0x333344));
 
 let mesh = null;
+let hasFramedModel = false;
 const material = new THREE.MeshStandardMaterial({
   color: 0xf9b233, metalness: 0.1, roughness: 0.6, flatShading: true
+});
+const edgeMaterial = new THREE.LineBasicMaterial({
+  color: 0x5c3a08,
+  transparent: true,
+  opacity: 0.55,
+  depthWrite: false
 });
 
 function resize() {
@@ -144,16 +158,26 @@ async function renderToScene(code) {
   try {
     const geom = new STLLoader().parse(stl.buffer.slice(stl.byteOffset, stl.byteOffset + stl.byteLength));
     geom.computeVertexNormals();
-    if (mesh) { scene.remove(mesh); mesh.geometry.dispose(); }
+    if (mesh) {
+      scene.remove(mesh);
+      mesh.children.forEach((child) => child.geometry?.dispose());
+      mesh.geometry.dispose();
+    }
     mesh = new THREE.Mesh(geom, material);
+    const edges = new THREE.LineSegments(new THREE.EdgesGeometry(geom, 30), edgeMaterial);
+    edges.renderOrder = 1;
+    mesh.add(edges);
     mesh.rotation.x = -Math.PI / 2; // OpenSCAD Z-up -> Three.js Y-up
     scene.add(mesh);
     geom.computeBoundingSphere();
     const r = Math.max(20, geom.boundingSphere.radius);
-    if (mesh.__isFirst !== false) {
-      camera.position.set(r * 2, r * 2, r * 2);
-      controls.target.set(0, 0, 0);
-      mesh.__isFirst = false;
+    if (!hasFramedModel) {
+      mesh.updateMatrixWorld(true);
+      const center = geom.boundingSphere.center.clone().applyMatrix4(mesh.matrixWorld);
+      camera.position.copy(center).add(new THREE.Vector3(r * 2, r * 2, r * 2));
+      controls.target.copy(center);
+      controls.update();
+      hasFramedModel = true;
     }
     const tris = geom.attributes.position.count / 3;
     setStatus(`OK \u00b7 ${ms} ms \u00b7 ${tris.toLocaleString()} triangles \u00b7 ${stl.byteLength.toLocaleString()} B`);

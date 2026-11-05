@@ -28,3 +28,7 @@ special exception for linking with CGAL. See https://github.com/openscad/opensca
 
 It also bundles Three.js (media/three.module.js, OrbitControls.js, STLLoader.js)
 which is licensed under the MIT license. See https://github.com/mrdoob/three.js
+
+The Liberation font files under media/fonts are licensed under the SIL Open
+Font License 1.1. Their copyright notice and full license text are included in
+media/fonts/LICENSE.
