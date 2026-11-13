@@ -76,6 +76,7 @@
   "scripts": {
     "vscode:prepublish": "npm run package",
     "compile": "node esbuild.config.mjs",
+    "test": "node --test",
     "package": "node esbuild.config.mjs --production",
     "watch":   "node esbuild.config.mjs --watch",
     "vsix":    "vsce package --no-dependencies"
