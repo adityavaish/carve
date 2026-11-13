@@ -6,6 +6,7 @@ import OpenSCAD from 'openscad';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { STLLoader } from 'three/addons/loaders/STLLoader.js';
+import { moduleOptions, runJob } from './run.js';
 
 const vscode = acquireVsCodeApi();
 const $status = document.getElementById('status');
@@ -37,8 +38,7 @@ try {
   wasmBinary = await fetch(wasmUrl).then((r) => r.arrayBuffer());
   // Eager-instantiate once so the first render is fast.
   Module = await OpenSCAD({
-    noInitialRun: true,
-    noExitRuntime: true,
+    ...moduleOptions,
     wasmBinary,
     locateFile: () => wasmUrl.toString()
   });
@@ -54,8 +54,7 @@ try {
 async function freshModule() {
   const wasmUrl = new URL(import.meta.resolve('openscad-wasm'));
   const M = await OpenSCAD({
-    noInitialRun: true,
-    noExitRuntime: true,
+    ...moduleOptions,
     wasmBinary,
     locateFile: () => wasmUrl.toString()
   });
@@ -101,7 +100,7 @@ loop();
 // --- Render pipeline ------------------------------------------------------
 let pending = 0;
 let moduleUsed = false; // true once we've called callMain on `Module`
-async function runOpenscad(code, format) {
+async function runOpenscad(job, format) {
   // OpenSCAD's main() leaves C++ static state behind that prevents a clean
   // second call. Re-instantiate the module between renders.
   if (moduleUsed) {
@@ -109,30 +108,26 @@ async function runOpenscad(code, format) {
   }
   moduleUsed = true;
   capture.reset();
-  try { Module.FS.writeFile('/in.scad', code); } catch (e) {
-    return { success: false, stderr: 'FS.writeFile failed: ' + e.message };
-  }
-  let rc;
+  let res;
   try {
-    rc = Module.callMain(['/in.scad', '-o', '/out', '--export-format=' + format]);
+    res = runJob(Module, job, format);
   } catch (e) {
     return { success: false, stderr: capture.stderr() || String(e) };
   }
-  if (rc !== 0 && rc !== undefined) {
-    return { success: false, stderr: capture.stderr() || `OpenSCAD exited ${rc}` };
+  if (res.rc !== 0 && res.rc !== undefined) {
+    return { success: false, stderr: capture.stderr() || `OpenSCAD exited ${res.rc}` };
   }
-  let data;
-  try { data = Module.FS.readFile('/out'); } catch (e) {
+  if (!res.data) {
     return { success: false, stderr: capture.stderr() || 'No output produced' };
   }
-  return { success: true, data, stderr: capture.stderr() };
+  return { success: true, data: res.data, stderr: capture.stderr() };
 }
 
-async function renderToScene(code) {
+async function renderToScene(job) {
   const myId = ++pending;
   const t0 = performance.now();
   setStatus('Rendering\u2026');
-  const result = await runOpenscad(code, 'binstl');
+  const result = await runOpenscad(job, 'binstl');
   if (myId !== pending) return; // superseded
   const ms = (performance.now() - t0).toFixed(0);
   if (!result.success) {
@@ -164,9 +159,9 @@ async function renderToScene(code) {
   }
 }
 
-async function doExport(code, format) {
+async function doExport(job, format) {
   setStatus('Exporting (' + format + ')\u2026');
-  const result = await runOpenscad(code, format);
+  const result = await runOpenscad(job, format);
   if (!result.success) {
     vscode.postMessage({ type: 'exportResult', success: false, error: result.stderr });
     setStatus('Export failed', true);
@@ -185,8 +180,8 @@ async function doExport(code, format) {
 
 window.addEventListener('message', (ev) => {
   const msg = ev.data;
-  if (msg?.type === 'render') renderToScene(msg.code);
-  else if (msg?.type === 'export') doExport(msg.code, msg.format || 'binstl');
+  if (msg?.type === 'render') renderToScene(msg.job);
+  else if (msg?.type === 'export') doExport(msg.job, msg.format || 'binstl');
 });
 
 // Tell host we're ready (in case the initial 'ready' was sent before this listener registered).

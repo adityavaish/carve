@@ -1,5 +1,9 @@
 # Change Log
 
+## Unreleased
+- `include <...>`, `use <...>` and `import("...")` now work: referenced files are resolved relative to the file and on the library path (`carve.libraryPaths`, `OPENSCADPATH`, the OpenSCAD user library folder) and mounted in the WASM filesystem (#2)
+- Errors and warnings are reported in the Problems pane against the file they occurred in, including messages without a line number
+
 ## 0.1.5 — 2026-05-16
 - Corrected publisher ID to `carve3d` (first marketplace release)
 

@@ -40,6 +40,7 @@
 | --- | --- | --- |
 | `carve.autoRender` | `true` | Re-render as you type |
 | `carve.debounceMs` | `500` | Delay before re-rendering after a change |
+| `carve.libraryPaths` | `[]` | Extra directories searched for `include <...>` / `use <...>`, relative to the workspace folder. `OPENSCADPATH` and the OpenSCAD user library folder are always searched |
 | `carve.exportFormat` | `binstl` | Format for `Carve: Export STL` (`binstl`, `asciistl`, `off`, `amf`, `3mf`, `obj`) |
 
 ## How it works
