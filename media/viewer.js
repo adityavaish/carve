@@ -5,7 +5,7 @@
 import OpenSCAD from 'openscad';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-import { STLLoader } from 'three/addons/loaders/STLLoader.js';
+import { parseOFF } from './off.js';
 
 const vscode = acquireVsCodeApi();
 const $status = document.getElementById('status');
@@ -79,8 +79,9 @@ scene.add(new THREE.GridHelper(100, 10, 0x444466, 0x333344));
 
 let mesh = null;
 const material = new THREE.MeshStandardMaterial({
-  color: 0xf9b233, metalness: 0.1, roughness: 0.6, flatShading: true
+  vertexColors: true, metalness: 0.1, roughness: 0.6, flatShading: true
 });
+const DEFAULT_COLOR = [0xf9 / 255, 0xb2 / 255, 0x33 / 255]; // parts without color()
 
 function resize() {
   const w = canvas.clientWidth, h = canvas.clientHeight;
@@ -132,7 +133,8 @@ async function renderToScene(code) {
   const myId = ++pending;
   const t0 = performance.now();
   setStatus('Rendering\u2026');
-  const result = await runOpenscad(code, 'binstl');
+  // OFF rather than STL: it is the one mesh format here that keeps color().
+  const result = await runOpenscad(code, 'off');
   if (myId !== pending) return; // superseded
   const ms = (performance.now() - t0).toFixed(0);
   if (!result.success) {
@@ -140,10 +142,15 @@ async function renderToScene(code) {
     vscode.postMessage({ type: 'rendered', success: false, stderr: result.stderr });
     return;
   }
-  const stl = result.data;
+  const off = result.data;
   try {
-    const geom = new STLLoader().parse(stl.buffer.slice(stl.byteOffset, stl.byteOffset + stl.byteLength));
+    const { positions, colors, hasAlpha } = parseOFF(new TextDecoder().decode(off), DEFAULT_COLOR);
+    const geom = new THREE.BufferGeometry();
+    geom.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    geom.setAttribute('color', new THREE.BufferAttribute(colors, 4));
     geom.computeVertexNormals();
+    material.transparent = hasAlpha;
+    material.needsUpdate = true;
     if (mesh) { scene.remove(mesh); mesh.geometry.dispose(); }
     mesh = new THREE.Mesh(geom, material);
     mesh.rotation.x = -Math.PI / 2; // OpenSCAD Z-up -> Three.js Y-up
@@ -156,10 +163,10 @@ async function renderToScene(code) {
       mesh.__isFirst = false;
     }
     const tris = geom.attributes.position.count / 3;
-    setStatus(`OK \u00b7 ${ms} ms \u00b7 ${tris.toLocaleString()} triangles \u00b7 ${stl.byteLength.toLocaleString()} B`);
+    setStatus(`OK \u00b7 ${ms} ms \u00b7 ${tris.toLocaleString()} triangles \u00b7 ${off.byteLength.toLocaleString()} B`);
     vscode.postMessage({ type: 'rendered', success: true, stderr: result.stderr });
   } catch (e) {
-    setStatus('STL parse failed: ' + e.message, true);
+    setStatus('Mesh parse failed: ' + e.message, true);
     vscode.postMessage({ type: 'rendered', success: false, stderr: String(e) });
   }
 }

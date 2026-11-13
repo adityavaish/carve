@@ -188,7 +188,6 @@ function renderWebviewHtml(webview: vscode.Webview, extUri: vscode.Uri): string 
   const viewerJs = webview.asWebviewUri(vscode.Uri.joinPath(mediaUri, 'viewer.js'));
   const threeJs  = webview.asWebviewUri(vscode.Uri.joinPath(mediaUri, 'three.module.js'));
   const orbitJs  = webview.asWebviewUri(vscode.Uri.joinPath(mediaUri, 'OrbitControls.js'));
-  const stlJs    = webview.asWebviewUri(vscode.Uri.joinPath(mediaUri, 'STLLoader.js'));
   const nonce = getNonce();
   const csp = [
     `default-src 'none'`,
@@ -226,8 +225,7 @@ function renderWebviewHtml(webview: vscode.Webview, extUri: vscode.Uri): string 
     "openscad": "${wasmJs}",
     "openscad-wasm": "${wasmBin}",
     "three": "${threeJs}",
-    "three/addons/controls/OrbitControls.js": "${orbitJs}",
-    "three/addons/loaders/STLLoader.js": "${stlJs}"
+    "three/addons/controls/OrbitControls.js": "${orbitJs}"
   }
 }
 </script>

@@ -1,5 +1,8 @@
 # Change Log
 
+## Unreleased
+- `color()` now shows in the preview, including alpha. The preview mesh is read from OpenSCAD's OFF export, which keeps per-face colours, instead of STL (#1)
+
 ## 0.1.5 — 2026-05-16
 - Corrected publisher ID to `carve3d` (first marketplace release)
 
