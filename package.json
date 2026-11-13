@@ -64,6 +64,12 @@
           "maximum": 5000,
           "description": "Debounce delay (ms) before re-rendering after a change."
         },
+        "carve.libraryPaths": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": [],
+          "description": "Extra directories searched for `include <...>` and `use <...>`, relative to the workspace folder. OPENSCADPATH and the OpenSCAD user library folder are always searched."
+        },
         "carve.exportFormat": {
           "type": "string",
           "default": "binstl",
@@ -76,6 +82,7 @@
   "scripts": {
     "vscode:prepublish": "npm run package",
     "compile": "node esbuild.config.mjs",
+    "test": "esbuild src/deps.ts --format=esm --outfile=dist/deps.mjs --log-level=warning && node --test",
     "package": "node esbuild.config.mjs --production",
     "watch":   "node esbuild.config.mjs --watch",
     "vsix":    "vsce package --no-dependencies"
