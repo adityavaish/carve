@@ -17,12 +17,13 @@ const setStatus = (text, isError = false) => {
   $status.classList.toggle('error', !!isError);
 };
 
-function captureOutput(Module) {
+// Emscripten reads print/printErr once at start-up, so they have to be passed
+// in as module options; assigning them afterwards captures nothing.
+function captureOutput() {
   const out = [];
   const err = [];
-  Module.print = (s) => out.push(s);
-  Module.printErr = (s) => err.push(s);
   return {
+    options: { print: (s) => out.push(s), printErr: (s) => err.push(s) },
     stdout: () => out.join('\n'),
     stderr: () => err.join('\n'),
     reset: () => { out.length = 0; err.length = 0; }
@@ -37,12 +38,7 @@ try {
   const wasmUrl = new URL(import.meta.resolve('openscad-wasm'));
   wasmBinary = await fetch(wasmUrl).then((r) => r.arrayBuffer());
   // Eager-instantiate once so the first render is fast.
-  Module = await OpenSCAD({
-    ...moduleOptions,
-    wasmBinary,
-    locateFile: () => wasmUrl.toString()
-  });
-  capture = captureOutput(Module);
+  Module = await freshModule();
   setStatus('Ready.');
   vscode.postMessage({ type: 'ready' });
 } catch (e) {
@@ -53,13 +49,13 @@ try {
 
 async function freshModule() {
   const wasmUrl = new URL(import.meta.resolve('openscad-wasm'));
-  const M = await OpenSCAD({
+  capture = captureOutput();
+  return OpenSCAD({
     ...moduleOptions,
+    ...capture.options,
     wasmBinary,
     locateFile: () => wasmUrl.toString()
   });
-  capture = captureOutput(M);
-  return M;
 }
 
 // --- Three.js scene -------------------------------------------------------
